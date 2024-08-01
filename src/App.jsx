@@ -54,12 +54,22 @@ function Board({ xIsNext, squares, onPlay }) {
     onPlay(nextSquares);
   }
 
+  function checkGameOver() {
+    return squares.every((val) => val);
+  }
+
   const winner = calculateWinner(squares);
+  const isGameOver = checkGameOver();
+
   let status;
   if (winner) {
     status = "Winner is " + winner.name;
   } else {
-    status = "Next player is " + (xIsNext ? "X" : "O");
+    if (isGameOver) {
+      status = "Game ended in a draw";
+    } else {
+      status = "Next player is " + (xIsNext ? "X" : "O");
+    }
   }
 
   function renderSquares() {
@@ -70,7 +80,7 @@ function Board({ xIsNext, squares, onPlay }) {
     for (let rowIndex = 0; rowIndex < row; rowIndex++) {
       const rowSquares = [];
       for (let colIndex = 0; colIndex < col; colIndex++) {
-        const key = rowIndex * 3 + colIndex;
+        const key = rowIndex * row + colIndex;
         rowSquares.push(
           <Square
             key={key}
