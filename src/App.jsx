@@ -16,6 +16,9 @@ function Square({ squareIndex, winner, value, onClickSquare }) {
 }
 
 function Board({ xIsNext, squares, onPlay }) {
+  const row = 3;
+  const col = 3;
+
   function calculateWinner(squares) {
     const lines = [
       [0, 1, 2],
@@ -40,6 +43,10 @@ function Board({ xIsNext, squares, onPlay }) {
     return null;
   }
 
+  function convertSquareIndexToCoordinate(index) {
+    return `(${Math.floor((index)/row) + 1} , ${index%row +1})`
+  }
+
   function handleClick(i) {
     if (squares[i] || calculateWinner(squares)) {
       return;
@@ -51,7 +58,10 @@ function Board({ xIsNext, squares, onPlay }) {
     } else {
       nextSquares[i] = "O";
     }
-    onPlay(nextSquares);
+
+    const nextCoordinates = convertSquareIndexToCoordinate(i);
+
+    onPlay(nextSquares, nextCoordinates);
   }
 
   function checkGameOver() {
@@ -73,8 +83,6 @@ function Board({ xIsNext, squares, onPlay }) {
   }
 
   function renderSquares() {
-    const row = 3;
-    const col = 3;
     const board = [];
 
     for (let rowIndex = 0; rowIndex < row; rowIndex++) {
@@ -110,13 +118,16 @@ function Board({ xIsNext, squares, onPlay }) {
 
 export default function Game() {
   const [history, setHistory] = useState([Array(9).fill(null)]);
+  const [coordinatesHistory, setCoordinatesHistory] = useState([Array(9).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
   const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
 
-  function handlePlay(nextSquares) {
+  function handlePlay(nextSquares, nextCoordinates) {
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    const nextCoordinatesHistory = [...coordinatesHistory.slice(0, currentMove+1), nextCoordinates];
     setHistory(nextHistory);
+    setCoordinatesHistory(nextCoordinatesHistory);
     setCurrentMove(nextHistory.length - 1);
   }
 
@@ -128,7 +139,7 @@ export default function Game() {
     let message;
 
     if (index > 0) {
-      message = `Go to move # ${index}`;
+      message = `Go to move # ${index} ${coordinatesHistory[index]}`;
     } else {
       message = "Go to game start";
     }
@@ -136,7 +147,7 @@ export default function Game() {
     return (
       <li key={index}>
         {currentMove === index ? (
-          "현재 move # " + index + "에 있습니다"
+          `현재 move # ${index}에 있습니다 ${coordinatesHistory[index]}`
         ) : (
           <button onClick={() => jumpTo(index)}>{message}</button>
         )}
